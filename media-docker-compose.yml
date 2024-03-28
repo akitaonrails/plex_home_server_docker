@@ -1,0 +1,147 @@
+version: '3'
+
+name: 'media'
+
+services:
+  qbittorrent:
+    image: linuxserver/qbittorrent:latest
+    restart: unless-stopped
+    environment:
+      - TZ=America/Sao_Paulo
+      - WEBUI_PORT=8080
+      - PUID=1000
+      - PGID=1000
+    volumes:
+      - /home/akitaonrails/qbittorrent/config:/config
+      - /mnt/terachad/Downloads/torrents:/downloads
+    ports:
+      - '8080:8080'
+      - '62609:62609'
+
+  jackett:
+    image: ghcr.io/linuxserver/jackett:latest
+    restart: unless-stopped
+    environment:
+      - TZ=America/Sao_Paulo
+      - PUID=1000
+      - PGID=1000
+    volumes:
+      - /home/akitaonrails/jackett/downloads:/downloads
+      - /home/akitaonrails/jackett/config:/config
+    ports:
+      - '9117:9117'
+
+  bazarr:
+    image: ghcr.io/linuxserver/bazarr:latest
+    restart: unless-stopped
+    environment:
+      - TZ=America/Sao_Paulo
+      - PUID=1000
+      - PGID=1000
+    volumes:
+      - /mnt/terachad/Videos/radarr:/movies
+      - /mnt/terachad/Videos/sonarr:/tv
+      - /home/akitaonrails/bazarr/appdata/config:/config
+    ports:
+      - '6767:6767'
+
+  overseerr:
+    image: sctx/overseerr
+    restart: unless-stopped
+    depends_on:
+      - qbittorrent
+    environment:
+      - TZ=America/Sao_Paulo
+      - PORT=5055
+    volumes:
+      - /home/akitaonrails/overseerr/config:/app/config
+    ports:
+      - '5055:5055'
+
+  prowlarr:
+    image: ghcr.io/hotio/prowlarr:latest
+    restart: unless-stopped
+    depends_on:
+      - flaresolverr
+    environment:
+      - TZ=America/Sao_Paulo
+      - PUID=1000
+      - PGID=1000
+    volumes:
+      - /home/akitaonrails/prowlarr/config:/config
+    ports:
+      - '9696:9696'
+
+  flaresolverr:
+    image: ghcr.io/flaresolverr/flaresolverr:latest
+    restart: unless-stopped
+    volumes:
+      - /home/akitaonrails/flaresolverr/config:/config
+    ports:
+      - '8191:8191'
+
+  sabnzbd:
+    image: lscr.io/linuxserver/sabnzbd:latest
+    restart: unless-stopped
+    environment:
+      - TZ=America/Sao_Paulo
+      - PUID=1000
+      - PGID=1000
+    volumes:
+      - /mnt/terachad/Downloads/nzbget:/downloads
+      - /mnt/terachad/Downloads/nzbget/incomplete:/incomplete-downloads
+      - /home/akitaonrails/nzbget/config:/config
+    ports:
+      - '6789:6789'
+
+  radarr:
+    image: ghcr.io/linuxserver/radarr:latest
+    restart: unless-stopped
+    depends_on:
+      - qbittorrent
+    environment:
+      - TZ=America/Sao_Paulo
+      - PUID=1000
+      - PGID=1000
+    volumes:
+      - /home/akitaonrails/radarr/appdata/config:/config
+      - /mnt/terachad/Downloads/torrents:/downloads
+      - /mnt/terachad/Videos/radarr/movies:/movies
+      - /mnt/terachad/Videos/radarr/anime:/anime
+    ports:
+      - '7878:7878'
+
+  sonarr:
+    image: ghcr.io/linuxserver/sonarr:latest
+    restart: unless-stopped
+    depends_on:
+      - qbittorrent
+    environment:
+      - TZ=America/Sao_Paulo
+      - PUID=1000
+      - PGID=1000
+    volumes:
+      - /home/akitaonrails/sonarr/appdata/config:/config
+      - /mnt/terachad/Videos/sonarr:/tv
+      - /mnt/terachad/Downloads/torrents:/downloads
+    ports:
+      - '8989:8989'
+
+  plex:
+    image: plexinc/pms-docker:latest
+    restart: unless-stopped
+    environment:
+      - TZ=America/Sao_Paulo
+      - PUID=1000
+      - PGID=1000
+      - VA_DRIVER=IHD
+      - PLEX_HW_TRANS_MAX=16
+    volumes:
+      - /home/akitaonrails/plex/config:/config
+      - /home/akitaonrails/plex/data:/data
+      - /home/akitaonrails/plex/transcode:/transcode
+      - /mnt/terachad/Videos:/media
+    devices:
+      - /dev/dri:/dev/dri
+      - /dev/bus/usb:/dev/bus/usb
+    network_mode: host

@@ -1,0 +1,35 @@
+version: '3'
+
+name: 'rip'
+
+services:
+  makemkv:
+    image: jlesage/makemkv
+    restart: unless-stopped
+    volumes:
+      - /home/akitaonrails/makemkv:/config
+      - /mnt/terachad/Videos/BluRay:/output
+      - /home/akitaonrails:/storage:ro
+    devices:
+      - /dev/sr0:/dev/sr0
+      - /dev/sg0:/dev/sg0
+    ports:
+      - '5800:5800'
+
+  handbrake:
+    restart: unless-stopped
+    image: jlesage/handbrake
+    ports:
+      - "5801:5800"
+    environment:
+      - AUTOMATED_CONVERSION=0
+      - HANDBRAKE_GUI=1
+      - DARK_MODE=1
+      - TZ=America/Sao_Paulo
+    volumes:
+      - "/home/akitaonrails/handbrake:/config:rw"
+      - "/home/akitaonrails:/storage:ro"
+      - "/mnt/terachad/Videos/BluRay:/watch:rw"
+      - "/mnt/terachad/Videos/BluRayOptimized:/output:rw"
+    devices:
+      - /dev/dri:/dev/dri

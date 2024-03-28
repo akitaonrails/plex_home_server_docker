@@ -1,0 +1,33 @@
+version: '3'
+
+name: 'net'
+
+services:
+  cloudflared:
+    image: visibilityspots/cloudflared:latest
+    restart: unless-stopped
+    environment:
+      - UPSTREAM1=https://1.1.1.1/dns-query
+      - UPSTREAM2=https://1.0.0.1/dns-query
+      - PORT=5054
+      - ADDRESS=0.0.0.0
+      - METRICS=127.0.0.1:8088
+    network_mode: host
+
+  pihole:
+    image: pihole/pihole:latest
+    restart: unless-stopped
+    depends_on:
+      - cloudflared
+    environment:
+      - DNSMASQ_USER=pihole
+      - WEBPASSWORD=ekCiN8!8b8ciNt2YmFAER
+      - TZ=America/Sao_Paulo
+      - PIHOLE_DNS_=127.0.0.1#5054
+      - WEB_PORT=8053
+    volumes:
+      - /home/akitaonrails/dnsmasq.d:/etc/dnsmasq.d
+      - /home/akitaonrails/pihole:/etc/pihole
+    network_mode: host
+    cap_add:
+      - NET_RAW
