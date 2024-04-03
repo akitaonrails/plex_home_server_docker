@@ -49,7 +49,7 @@ services:
       - kaizoku-db:/var/lib/postgresql/data
 
   kavita:
-    image: kizaing/kavita:latest
+    image: jvmilazz0/kavita:latest
     restart: unless-stopped
     volumes:
       - /home/akitaonrails/kavita:/kavita/config
